@@ -2,6 +2,7 @@
 [general]
 name=DEM Resample Interpolator
 description=Professional DEM resampling tool for high-resolution terrain analysis using Bilinear, Bicubic, and Lanczos interpolation methods.
+about=DEM Resample Interpolator is a professional QGIS plugin for upsampling or downsampling Digital Elevation Model (DEM) rasters to any target resolution (e.g., 0.5m to 0.2m). It supports three high-quality interpolation algorithms: Bilinear (smooth gradients, ideal for general terrain), Bicubic (sharper, higher-order, suited for DEM upsampling), and Lanczos (sinc-based, best quality for significant resolution increases). The plugin includes a built-in method description panel so users understand how each algorithm works and when to use it, a live progress bar, and error handling. Developed for GIS professionals in power transmission, infrastructure, and terrain analysis workflows.
 version=1.0
 qgisMinimumVersion=3.0
 author=Vicky Sharma
