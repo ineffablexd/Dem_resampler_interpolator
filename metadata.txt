@@ -1,0 +1,17 @@
+
+[general]
+name=DEM Resample Interpolator
+description=Professional DEM resampling tool for high-resolution terrain analysis using Bilinear, Bicubic, and Lanczos interpolation methods.
+version=1.0
+qgisMinimumVersion=3.0
+author=Vicky Sharma
+email=vsharma@powergrid.in
+repository=https://github.com/ineffablexd/dem_resampling_plugin
+homepage=https://github.com/ineffablexd/dem_resampling_plugin
+tracker=https://github.com/ineffablexd/dem_resampling_plugin/issues
+license=GPL-2.0-or-later
+icon=icon.png
+tags=dem, resample, interpolation, bilinear, bicubic, lanczos, terrain, elevation, raster
+category=Raster
+experimental=False
+deprecated=False
