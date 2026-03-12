@@ -14,8 +14,11 @@ class DEMDialog(QDialog):
 
         self.iface = iface
         self.setWindowTitle("DEM Resample Interpolator")
+        self.setMinimumWidth(380)
 
         layout = QVBoxLayout()
+        layout.setSpacing(6)
+        layout.setContentsMargins(12, 12, 12, 12)
 
         # DEM selection
         layout.addWidget(QLabel("Select DEM Layer"))
@@ -44,36 +47,45 @@ class DEMDialog(QDialog):
         self.resolution = QDoubleSpinBox()
         self.resolution.setDecimals(2)
         self.resolution.setMinimum(0.1)
-        self.resolution.setValue(0.2)  # Default to 0.2m as user requested before
+        self.resolution.setValue(1.0) 
 
         layout.addWidget(self.resolution)
 
         # Method Description (Logic Info)
-        info_frame = QFrame()
-        info_frame.setFrameShape(QFrame.StyledPanel)
-        info_layout = QVBoxLayout(info_frame)
-        
         layout.addWidget(QLabel("Method Info & Logic:"))
         self.info_label = QLabel("")
         self.info_label.setWordWrap(True)
-        self.info_label.setMinimumHeight(60)
-        self.info_label.setStyleSheet("color: #444; font-style: italic; background-color: #f0f0f0; padding: 10px; border: 1px solid #ddd; border-radius: 4px;")
-        info_layout.addWidget(self.info_label)
-        layout.addWidget(info_frame)
+        self.info_label.setFixedHeight(90)
+        self.info_label.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+        self.info_label.setStyleSheet(
+            "color: #444; font-style: italic; background-color: #f0f0f0;"
+            "padding: 10px; border: 1px solid #ddd; border-radius: 4px;"
+        )
+        layout.addWidget(self.info_label)
+
+        # Progress indicator (above the run button, hidden by default)
+        self.progress_label = QLabel("")
+        self.progress_label.setAlignment(Qt.AlignCenter)
+        self.progress_label.setStyleSheet("color: #2980b9; font-size: 11px;")
+        self.progress_label.setVisible(False)
+        layout.addWidget(self.progress_label)
+
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setVisible(False)
+        self.progress_bar.setMinimumHeight(18)
+        self.progress_bar.setTextVisible(True)
+        self.progress_bar.setFormat("%p%")
+        self.progress_bar.setStyleSheet(
+            "QProgressBar { border: 1px solid #aaa; border-radius: 5px; background-color: #eee; text-align: center; font-weight: bold; }"
+            "QProgressBar::chunk { background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #2980b9, stop:1 #27ae60); border-radius: 4px; }"
+        )
+        layout.addWidget(self.progress_bar)
 
         # Run button
         self.run_btn = QPushButton("Generate Enhanced DEM")
         self.run_btn.setStyleSheet("font-weight: bold; height: 35px;")
         self.run_btn.clicked.connect(self.run_process)
         layout.addWidget(self.run_btn)
-
-        # Progress Bar (at the very bottom, thinner)
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setVisible(False)
-        self.progress_bar.setMaximumHeight(10)
-        self.progress_bar.setTextVisible(False)
-        self.progress_bar.setStyleSheet("QProgressBar { border: 1px solid #ddd; border-radius: 5px; background-color: #eee; } QProgressBar::chunk { background-color: #3498db; }")
-        layout.addWidget(self.progress_bar)
 
         self.setLayout(layout)
 
@@ -116,6 +128,8 @@ class DEMDialog(QDialog):
         # Reset Progress
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(True)
+        self.progress_label.setText("⏳ Processing, please wait...")
+        self.progress_label.setVisible(True)
         self.run_btn.setEnabled(False)
         QCoreApplication.processEvents()
 
@@ -135,11 +149,14 @@ class DEMDialog(QDialog):
             result = processing.run("gdal:warpreproject", params, feedback=feedback)
             self.iface.addRasterLayer(result['OUTPUT'], f"Resampled_{method}_{res}m")
             self.progress_bar.setValue(100)
+            self.progress_label.setText("✅ Done!")
             from qgis.PyQt.QtWidgets import QMessageBox
-            QMessageBox.information(self, "Success", f"DEM successfully resampled to {res}m using {method} interpolation.")
+            QMessageBox.information(self, "Success", f"DEM resampled to {res}m using {method}.")
         except Exception as e:
             from qgis.PyQt.QtWidgets import QMessageBox
+            self.progress_label.setText("❌ Failed.")
             QMessageBox.critical(self, "Processing Error", f"Resampling failed: {str(e)}")
         finally:
             self.run_btn.setEnabled(True)
-            self.progress_bar.setVisible(False)  # Hide it when done
+            self.progress_bar.setVisible(False)
+            self.progress_label.setVisible(False)
